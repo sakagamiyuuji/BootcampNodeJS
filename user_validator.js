@@ -1,6 +1,7 @@
 import readlineSync from 'readline-sync';
 import validator from 'validator';
 import chalk from 'chalk';
+import validatorPonsel from 'validator-ponsel';
 
 // Function to ask user for input and validate email and phone
 async function getUserDetails() {
@@ -12,10 +13,10 @@ async function getUserDetails() {
         email = readlineSync.question('Enter your email: ');
     }
 
-    const { default: validatorPhone } = await import('validator-ponsel');
+    // const { default: validatorPhone } = await import('validator-ponsel');
     
     let phone = readlineSync.question('Enter your phone number: ');
-    while (!validatorPhone(phone, 'any')) {
+    while (!validatorPonsel(phone, 'any')) {
         console.log(chalk.blue('Invalid phone number. Please enter a valid phone number.'));
         phone = readlineSync.question('Enter your phone number: ');
     }

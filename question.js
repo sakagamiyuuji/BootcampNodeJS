@@ -17,17 +17,17 @@ rl.question('Siapa nama kamu? ', (name) => {
 
     // console.log(`Saya tinggal di ${answers.location}`);
 
-        rl.question(`Email kamu apa ${name}? `, (email) => {
-            answers.email = email;
+      rl.question(`Email kamu apa ${name}? `, (email) => {
+          answers.email = email;
 
-            // console.log(`Email ${answers.email}`);
+          // console.log(`Email ${answers.email}`);
 
-            console.log('\n');
-            console.log(`Nama saya adalah ${answers.name}`);
-            console.log(`Saya tinggal di ${answers.location}`);
-            console.log(`Email ${answers.email}`);
+          console.log('\n');
+          console.log(`Nama saya adalah ${answers.name}`);
+          console.log(`Saya tinggal di ${answers.location}`);
+          console.log(`Email ${answers.email}`);
 
-            rl.close();
-        });
-    });
+          rl.close();
+      });
+  });
 });
