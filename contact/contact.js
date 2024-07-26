@@ -14,8 +14,8 @@ const dirPath = "./data";
 const contactsFile = path.join(dirPath, "contacts.json");
 
 /**
- * Reads contacts from the file.
- * @returns {Array} List of contacts.
+ * Membaca kontak dari file.
+ * @returns {Array} Daftar kontak.
  */
 const readContacts = () => {
     if (fs.existsSync(contactsFile)) {
@@ -26,8 +26,8 @@ const readContacts = () => {
 };
 
 /**
- * Writes contacts to the file.
- * @param {Array} contacts - List of contacts to write.
+ * Menulis kontak ke file.
+ * @param {Array} contacts - Daftar kontak yang akan ditulis.
  * @returns {void}
  */
 const writeContacts = (contacts) => {
@@ -38,14 +38,34 @@ const writeContacts = (contacts) => {
 };
 
 /**
- * Adds a new contact.
+ * Checks if a contact with the given name already exists.
+ * @param {string} name - The name of the contact to check.
+ * @returns {boolean} True if the contact exists, false otherwise.
+ */
+const contactExists = (name) => {
+    const contacts = readContacts();
+    return contacts.some(
+        (contact) => contact.name.toLowerCase() === name.toLowerCase()
+    );
+};
+
+/**
+ * Menambahkan kontak baru.
  * @returns {Promise<void>}
  */
 const addContact = async () => {
+    const contacts = readContacts(); // Membaca kontak sekali di awal
+
     const questions = [
         {
             name: "name",
             message: "Masukkan nama:",
+            validate: (value) => {
+                if (contactExists(value)) {
+                    return "Nama kontak sudah ada! Silakan masukkan nama yang berbeda.";
+                }
+                return true;
+            },
         },
         {
             name: "phone",
@@ -69,13 +89,13 @@ const addContact = async () => {
         },
     ];
 
-    const getInput = (question) => {
+    const getInput = async (question) => {
         return new Promise((resolve) => {
             rl.question(`${question.message} `, (input) => {
                 if (question.validate) {
                     const valid = question.validate(input);
                     if (valid === true) {
-                        resolve(input);
+                        resolve(input.trim());
                     } else {
                         console.log(valid);
                         resolve(getInput(question));
@@ -92,17 +112,15 @@ const addContact = async () => {
         answers[question.name] = await getInput(question);
     }
 
-    const contacts = readContacts();
     contacts.push(answers);
     writeContacts(contacts);
     console.log("Kontak berhasil ditambahkan!");
 
     rl.close();
-    process.exit(0);
 };
 
 /**
- * Lists all contacts.
+ * Menampilkan semua kontak.
  * @returns {void}
  */
 const listContacts = () => {
@@ -113,17 +131,17 @@ const listContacts = () => {
         console.log("Daftar Kontak:");
         contacts.forEach((contact, index) => {
             console.log(
-                //`${index + 1}. Nama: ${contact.name}, Telepon: ${contact.phone}`
-                `${index + 1}. ${contact.name}`
+                `${index + 1}. Nama: ${contact.name}, Telepon: ${
+                    contact.phone
+                }, Email: ${contact.email}`
             );
         });
     }
-    rl.close();
 };
 
 /**
- * Shows the detail of a contact by name.
- * @param {string} name - The name of the contact.
+ * Menampilkan detail kontak berdasarkan nama.
+ * @param {string} name - Nama kontak.
  * @returns {void}
  */
 const detailContact = (name) => {
@@ -138,16 +156,15 @@ const detailContact = (name) => {
     } else {
         console.log(`Kontak dengan nama ${name} tidak ditemukan.`);
     }
-    rl.close();
 };
 
 /**
- * Deletes a contact by name.
- * @param {string} name - The name of the contact.
+ * Menghapus kontak berdasarkan nama.
+ * @param {string} name - Nama kontak.
  * @returns {void}
  */
 const deleteContact = (name) => {
-    let contacts = readContacts();
+    const contacts = readContacts();
     const newContacts = contacts.filter(
         (c) => c.name.toLowerCase() !== name.toLowerCase()
     );
@@ -158,14 +175,104 @@ const deleteContact = (name) => {
         writeContacts(newContacts);
         console.log(`Kontak dengan nama ${name} berhasil dihapus.`);
     }
+};
+
+/**
+ * Memperbarui kontak berdasarkan nama.
+ * @returns {Promise<void>}
+ */
+const updateContact = async () => {
+    const contacts = readContacts(); // Membaca kontak sekali di awal
+
+    // Prompt for the contact name to update
+    const name = await new Promise((resolve) => {
+        rl.question("Masukkan nama kontak yang akan diperbarui: ", (input) => {
+            resolve(input.trim());
+        });
+    });
+
+    const contactIndex = contacts.findIndex(
+        (contact) => contact.name.toLowerCase() === name.toLowerCase()
+    );
+
+    if (contactIndex === -1) {
+        console.log(`Kontak dengan nama ${name} tidak ditemukan.`);
+        rl.close();
+        return;
+    }
+
+    const questions = [
+        {
+            name: "name",
+            message: "Masukkan nama baru (kosongkan untuk tidak mengubah):",
+            validate: (value) => {
+                if (value && contactExists(value)) {
+                    return "Nama kontak sudah ada! Silakan masukkan nama yang berbeda.";
+                }
+                return true;
+            },
+        },
+        {
+            name: "phone",
+            message:
+                "Masukkan nomor telepon baru (kosongkan untuk tidak mengubah):",
+            validate: (value) => {
+                if (!value || validator.isMobilePhone(value, "id-ID")) {
+                    return true;
+                }
+                return "Nomor telepon tidak valid!";
+            },
+        },
+        {
+            name: "email",
+            message: "Masukkan email baru (kosongkan untuk tidak mengubah):",
+            validate: (value) => {
+                if (!value || validator.isEmail(value)) {
+                    return true;
+                }
+                return "Email tidak valid!";
+            },
+        },
+    ];
+
+    const getInput = async (question) => {
+        return new Promise((resolve) => {
+            rl.question(`${question.message} `, (input) => {
+                if (question.validate) {
+                    const valid = question.validate(input);
+                    if (valid === true) {
+                        resolve(input.trim());
+                    } else {
+                        console.log(valid);
+                        resolve(getInput(question));
+                    }
+                } else {
+                    resolve(input);
+                }
+            });
+        });
+    };
+
+    const updatedContact = { ...contacts[contactIndex] };
+    for (const question of questions) {
+        const answer = await getInput(question);
+        if (answer) {
+            updatedContact[question.name] = answer;
+        }
+    }
+
+    contacts[contactIndex] = updatedContact;
+    writeContacts(contacts);
+    console.log("Kontak berhasil diperbarui!");
+
     rl.close();
-    process.exit(0);
 };
 
 // Konfigurasi yargs untuk menangani berbagai perintah
 yargs(hideBin(process.argv))
     .version("1.0.2")
     .command("add", "Tambah kontak baru", {}, addContact)
+    .command("update", "Perbarui kontak yang ada", {}, updateContact)
     .command("list", "Tampilkan semua kontak", {}, listContacts)
     .command(
         "detail <name>",
