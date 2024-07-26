@@ -107,16 +107,18 @@ const addContact = async () => {
  */
 const listContacts = () => {
     const contacts = readContacts();
-    console.log("Daftar Kontak:");
-    contacts.forEach((contact, index) => {
-        console.log(
-            `${index + 1}. Nama: ${contact.name}, Telepon: ${
-                contact.phone
-            }, Email: ${contact.email}`
-        );
-    });
+    if (contacts.length === 0) {
+        console.log("Data kosong");
+    } else {
+        console.log("Daftar Kontak:");
+        contacts.forEach((contact, index) => {
+            console.log(
+                //`${index + 1}. Nama: ${contact.name}, Telepon: ${contact.phone}`
+                `${index + 1}. ${contact.name}`
+            );
+        });
+    }
     rl.close();
-    process.exit(0);
 };
 
 /**
