@@ -1,7 +1,7 @@
 import http from "http";
 import fs from "fs";
-import path from "path";
 import express from "express";
+import path from "path";
 import { fileURLToPath } from "url";
 
 const app = express();
@@ -11,24 +11,37 @@ const port = 3000;
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const dirPath = path.join(__dirname, "data");
-
-// Middleware to serve static files
-app.use(express.static(dirPath));
+// Set EJS as the view engine
+app.set("view engine", "ejs");
+app.set("views", path.join(__dirname, "views"));
 
 // Route for home page
 app.get("/", (req, res) => {
-    res.sendFile(path.join(dirPath, "index.html"));
+    res.render("index", { nama: "Hans" });
 });
 
 // Route for about page
 app.get("/about", (req, res) => {
-    res.sendFile(path.join(dirPath, "about.html"));
+    res.render("about");
 });
 
 // Route for contact page
 app.get("/contact", (req, res) => {
-    res.sendFile(path.join(dirPath, "contact.html"));
+    const listNama = [
+        {
+            nama: "Hans",
+            email: "varian.khasira@gmail.com",
+        },
+        {
+            nama: "Lisa",
+            email: "lisa.blackpink@gmail.com",
+        },
+        {
+            nama: "Random",
+            email: "random.idea@gmail.com",
+        },
+    ];
+    res.render("contact", { listNama });
 });
 
 // Route definition for product with productId and categoryId

@@ -1,0 +1,22 @@
+<div class="input-box">
+    <label for="productId">Product ID:</label>
+    <input type="text" id="productId" name="productId" />
+    <label for="categoryId">Category ID:</label>
+    <input type="text" id="categoryId" name="categoryId" />
+    <label for="price">Price:</label>
+    <input type="text" id="price" name="price" />
+    <button onclick="navigateToProduct()">Go to Product</button>
+</div>
+<p>Use the menu to navigate through the site.</p>
+<script>
+    function navigateToProduct() {
+        const productId = document.getElementById("productId").value;
+        const categoryId = document.getElementById("categoryId").value;
+        const price = document.getElementById("price").value;
+        let url = `/product/${productId}/category/${categoryId}`;
+        if (price) {
+            url += `?price=${price}`;
+        }
+        window.location.href = url;
+    }
+</script>
